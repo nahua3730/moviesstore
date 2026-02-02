@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Movie, Review
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseForbidden
 # Create your views here.
 def index(request):
     search_term = request.GET.get('search')
@@ -60,6 +61,8 @@ def delete_review(request, id, review_id):
 @login_required
 def report_review(request, id, review_id):
     review=get_object_or_404(Review, id=review_id)
+    if review.user == request.user:
+        return HttpResponseForbidden("You cannot report your own review.")
     review.is_reported=True
     review.save()
     return redirect('movies.show',id=id)
